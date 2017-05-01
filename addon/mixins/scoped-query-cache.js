@@ -73,5 +73,15 @@ export default Ember.Mixin.create({
 
       return results;
     });
+  },
+
+  scheduleCacheDecay(decayAfter = CACHE_DECAY_TIMEOUT) {
+    setTimeout(() => {
+      this.cache = this._createCache();
+    }, decayAfter);
+  },
+
+  _createCache() {
+    return Object.create(null);
   }
 });
