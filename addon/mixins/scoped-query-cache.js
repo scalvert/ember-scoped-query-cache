@@ -2,12 +2,15 @@ import Ember from 'ember';
 import sortedObject from 'ember-scoped-query-cache/utils/sorted-object';
 const { assert } = Ember;
 
+const CACHE_DECAY_TIMEOUT = 5000;
+
 export default Ember.Mixin.create({
   store: Ember.inject.service(),
 
   init() {
     this._super(...arguments);
-    this.cache = {};
+
+    this.cache = this._createCache();
   },
 
   queryRecord(modelName, query, options = {}) {
