@@ -75,10 +75,16 @@ export default Ember.Mixin.create({
     });
   },
 
-  scheduleCacheDecay(decayAfter = CACHE_DECAY_TIMEOUT) {
-    setTimeout(() => {
+  scheduleCacheDecay(delay = CACHE_DECAY_TIMEOUT, callback) {
+    this.decayId = setTimeout(() => {
       this.cache = this._createCache();
-    }, decayAfter);
+
+      callback && typeof callback === 'function' && callback();
+    }, delay);
+  },
+
+  cancelCacheDecay() {
+    clearTimeout(this.decayId);
   },
 
   _createCache() {

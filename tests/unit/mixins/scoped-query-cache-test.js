@@ -139,3 +139,34 @@ test('if shouldCachePredicate is false, do not insert into cache', function(asse
 
 // test('findRecord is supported');
 // test('failed promise is handled properly')
+
+test('ScopedQueryCacheMixin#scheduleCacheDecay schedules the decay task', function(assert) {
+  let done = assert.async();
+  let ScopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
+  let subject = ScopedQueryCacheObject.create();
+
+  subject.cache['key'] = 10;
+
+  subject.scheduleCacheDecay(50, () => {
+    assert.equal(Object.keys(subject.cache).length, 0);
+    done();
+  });
+});
+
+test('ScopedQueryCacheMixin#cancelDecay correctly cancels the cache deletion', function(assert) {
+  let done = assert.async();
+  let ScopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
+  let subject = ScopedQueryCacheObject.create();
+
+  subject.cache['key'] = 10;
+
+  subject.scheduleCacheDecay(3000);
+  subject.cancelCacheDecay();
+
+  setTimeout(() => {
+    assert.equal(Object.keys(subject.cache).length, 1);
+    assert.equal(subject.cache['key'], 10);
+
+    done();
+  }, 4000)
+});
