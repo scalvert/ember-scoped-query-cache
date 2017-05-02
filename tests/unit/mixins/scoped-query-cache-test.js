@@ -142,31 +142,27 @@ test('if shouldCachePredicate is false, do not insert into cache', function(asse
 
 test('scheduleCacheDecay schedules the decay task', function(assert) {
   let done = assert.async();
-  let ScopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
-  let subject = ScopedQueryCacheObject.create();
 
-  subject.cache['key'] = 10;
+  this.subject.cache['key'] = 10;
 
-  subject.scheduleCacheDecay(50, () => {
-    assert.equal(Object.keys(subject.cache).length, 0);
+  this.subject.scheduleCacheDecay(50, () => {
+    assert.equal(Object.keys(this.subject.cache).length, 0);
     done();
   });
 });
 
 test('cancelDecay correctly cancels the cache decay', function(assert) {
   let done = assert.async();
-  let ScopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
-  let subject = ScopedQueryCacheObject.create();
 
-  subject.cache['key'] = 10;
+  this.subject.cache['key'] = 10;
 
-  subject.scheduleCacheDecay(3000);
-  subject.cancelCacheDecay();
+  this.subject.scheduleCacheDecay(1000);
+  this.subject.cancelCacheDecay();
 
   setTimeout(() => {
-    assert.equal(Object.keys(subject.cache).length, 1);
-    assert.equal(subject.cache['key'], 10);
+    assert.equal(Object.keys(this.subject.cache).length, 1);
+    assert.equal(this.subject.cache['key'], 10);
 
     done();
-  }, 4000)
+  }, 3000);
 });
