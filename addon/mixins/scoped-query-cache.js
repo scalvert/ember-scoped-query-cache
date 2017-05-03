@@ -80,6 +80,10 @@ export default Ember.Mixin.create({
 
   scheduleCacheDecay(delay = CACHE_DECAY_TIMEOUT, callback) {
     this.decayId = Ember.run.later(() => {
+      if (this.isDestroying || this.isDestroyed) {
+        return;
+      }
+
       this.cache = this._createCache();
 
       callback && typeof callback === 'function' && callback();
@@ -87,6 +91,10 @@ export default Ember.Mixin.create({
   },
 
   cancelCacheDecay() {
+    if (this.isDestroying || this.isDestroyed) {
+      return;
+    }
+
     Ember.run.cancel(this.decayId);
   },
 
