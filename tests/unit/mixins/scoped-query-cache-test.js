@@ -15,14 +15,14 @@ module('Unit | Mixin | scoped query cache', {
      */
     const promiseMock = {
       then: (foo) => (RSVP.Promise.resolve(foo())),
-      catch: (bar) => (RSVP.Promise.resolve(bar())),
+      catch: (bar) => (RSVP.Promise.resolve(bar()))
     };
 
     this.queryRecordStub = this.sandbox.stub().returns(promiseMock);
     this.queryStub = this.sandbox.stub().returns(promiseMock);
     this.storeStub = {
       queryRecord: this.queryRecordStub,
-      query: this.queryStub,
+      query: this.queryStub
     };
 
     const scopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
