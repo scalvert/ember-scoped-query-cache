@@ -13,6 +13,12 @@ export default Ember.Mixin.create({
     this.cache = this._createCache();
   },
 
+  destroy() {
+    this.cancelCacheDecay();
+
+    this._super(...arguments);
+  },
+
   queryRecord(modelName, query, options = {}) {
     const queryRecordMethod = () => this.get('store').queryRecord(modelName, query);
     return this.queryCache(modelName, query, options, queryRecordMethod);
