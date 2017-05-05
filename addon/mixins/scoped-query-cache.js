@@ -1,16 +1,22 @@
 import Ember from 'ember';
-import sortedObject from 'ember-scoped-query-cache/utils/sorted-object';
-const { assert } = Ember;
+import { Cache, sortedObject } from 'ember-scoped-query-cache/utils';
+const {
+  assert,
+  run,
+  inject,
+  typeOf,
+  Mixin
+} = Ember;
 
 const CACHE_DECAY_TIMEOUT = 5000;
 
-export default Ember.Mixin.create({
-  store: Ember.inject.service(),
+export default Mixin.create({
+  store: inject.service(),
 
   init() {
     this._super(...arguments);
 
-    this.cache = this._createCache();
+    this._scopedQueryCache = this._createScopedQueryCache();
   },
 
   destroy() {
@@ -39,29 +45,19 @@ export default Ember.Mixin.create({
           formatCacheKey(query) :
           query;
 
-    assert('queryCache needs to be an object', Ember.typeOf(queryCache) === 'object');
+    assert('queryCache needs to be an object', typeOf(queryCache) === 'object');
     return JSON.stringify(sortedObject(queryCache));
   },
 
   queryCache(modelName, query, options = {}, queryMethod) {
     const { formatCacheKey, shouldCachePredicate } = options;
-    /**
-     * Let's assume modelName = 'foobar'
-     * The initial state for `this.cache` is {}
-     * We need to insert into cache resulting in
-     * cache = { 'foobar': {} }
-     */
-    if (!this.cache[modelName]) {
-      this.cache[modelName] = {};
-    }
 
     /**
      * Convert the object to a string with sorted keys
      * Check if we have a cache hit, and if not, insert into cache
      */
     const cacheReadStringifiedQuery = this.getStringifiedQuery(query, formatCacheKey);
-    const queriesForModel = this.cache[modelName];
-    const cacheHit = queriesForModel[cacheReadStringifiedQuery];
+    const cacheHit = this._scopedQueryCache.cache.get(modelName, cacheReadStringifiedQuery);
 
     if (cacheHit) {
       return cacheHit;
@@ -77,7 +73,7 @@ export default Ember.Mixin.create({
       assert('shouldCache needs to be a boolean value', typeof(shouldCache) === 'boolean');
 
       if (shouldCache) {
-        queriesForModel[cacheReadStringifiedQuery] = queryPromise;
+        this._scopedQueryCache.cache.add(modelName, cacheReadStringifiedQuery, queryPromise);
       }
 
       return results;
@@ -85,26 +81,30 @@ export default Ember.Mixin.create({
   },
 
   scheduleCacheDecay(delay = CACHE_DECAY_TIMEOUT, callback) {
-    this.decayId = Ember.run.later(() => {
+    if (this._scopedQueryCache.decayId) {
+      this.cancelCacheDecay();
+    }
+
+    this._scopedQueryCache.decayId = run.later(() => {
       if (this.isDestroying || this.isDestroyed) {
         return;
       }
 
-      this.cache = this._createCache();
+      this._scopedQueryCache = this._createScopedQueryCache();
 
       callback && typeof callback === 'function' && callback();
     }, delay);
   },
 
   cancelCacheDecay() {
-    if (this.isDestroying || this.isDestroyed) {
-      return;
-    }
-
-    Ember.run.cancel(this.decayId);
+    run.cancel(this._scopedQueryCache.decayId);
+    this._scopedQueryCache.decayId = null;
   },
 
-  _createCache() {
-    return Object.create(null);
+  _createScopedQueryCache() {
+    return {
+      cache: new Cache(),
+      decayId: null
+    };
   }
 });
