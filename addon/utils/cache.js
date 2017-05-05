@@ -37,6 +37,6 @@ export default class Cache {
   }
 
   get types() {
-    return Object.keys(this._internalCache).length;
+    return Object.keys(this._internalCache);
   }
 }

@@ -146,7 +146,7 @@ test('scheduleCacheDecay schedules the decay task', function(assert) {
   this.subject._scopedQueryCache.cache.add('type', 'key', 'value');
 
   this.subject.scheduleCacheDecay(50, () => {
-    assert.equal(this.subject._scopedQueryCache.cache.types, 0);
+    assert.equal(this.subject._scopedQueryCache.cache.types.length, 0);
     done();
   });
 });
@@ -160,7 +160,7 @@ test('cancelDecay correctly cancels the cache decay', function(assert) {
   this.subject.cancelCacheDecay();
 
   setTimeout(() => {
-    assert.equal(this.subject._scopedQueryCache.cache.types, 1);
+    assert.equal(this.subject._scopedQueryCache.cache.types.length, 1);
     assert.equal(this.subject._scopedQueryCache.cache.get('type', 'key'), 'value');
 
     done();

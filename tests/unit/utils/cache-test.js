@@ -62,11 +62,11 @@ test('Cache#remove doesn\'t remove items when type not present', (assert) => {
   cache.add('my-type', 'mykey', 'myvalue');
   cache.add('my-type', 'myotherkey', 'mynewvalue');
 
-  assert.equal(cache.types, 1);
+  assert.equal(cache.types.length, 1);
 
   cache.remove('other-type', 'mykey');
 
-  assert.equal(cache.types, 1);
+  assert.equal(cache.types.length, 1);
 });
 
 test('Cache#remove doesn\'t remove items when key not present', (assert) => {
@@ -90,11 +90,11 @@ test('Cache#clear removes all items from cache', (assert) => {
   cache.add('other-type', 'myotherkey', 'mynewvalue');
   cache.add('random-type', 'myotherkey', 'mynewvalue');
 
-  assert.equal(cache.types, 3);
+  assert.equal(cache.types.length, 3);
 
   cache.clear();
 
-  assert.equal(cache.types, 0);
+  assert.equal(cache.types.length, 0);
 });
 
 test('Cache#get retrieves item by type when type present', (assert) => {
