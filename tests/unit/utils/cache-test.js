@@ -1,125 +1,154 @@
 import { module, test } from 'qunit';
-import { Cache } from 'ember-scoped-query-cache/utils';
+import { QueryCache } from 'ember-scoped-query-cache/utils';
 
-module('Unit | Utility | cache');
+module('Unit | Utility | query-queryCache');
 
-test('Creates cache object with internal map', (assert) => {
-  let cache = new Cache();
+test('Creates queryCache object with internal map', (assert) => {
+  let queryCache = new QueryCache();
 
-  assert.ok(cache._internalCache);
+  assert.ok(queryCache._internalCache);
 });
 
-test('Cache#add skips adding if key is undefined', (assert) => {
-  let cache = new Cache();
+test('QueryCache#add skips adding if key is undefined', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type');
+  queryCache.add('my-type');
 
-  assert.notOk(cache._internalCache['my-type']);
+  assert.notOk(queryCache._internalCache['my-type']);
 });
 
-test('Cache#add skips adding if value is undefined', (assert) => {
-  let cache = new Cache();
+test('QueryCache#add skips adding if value is undefined', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey');
+  queryCache.add('my-type', 'mykey');
 
-  assert.notOk(cache._internalCache['my-type']);
+  assert.notOk(queryCache._internalCache['my-type']);
 });
 
-test('Cache#add adds item to cache when all params specified', (assert) => {
-  let cache = new Cache();
+test('QueryCache#add adds item to queryCache when all params specified', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
 
-  assert.ok(cache._internalCache['my-type']);
-  assert.ok(cache._internalCache['my-type']['mykey']);
+  assert.ok(queryCache._internalCache['my-type']);
+  assert.ok(queryCache._internalCache['my-type']['mykey']);
 });
 
-test('Cache#add updates existing value when key present', (assert) => {
-  let cache = new Cache();
+test('QueryCache#add updates existing value when key present', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'mykey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'mykey', 'mynewvalue');
 
-  assert.equal(cache._internalCache['my-type']['mykey'], 'mynewvalue');
+  assert.equal(queryCache._internalCache['my-type']['mykey'], 'mynewvalue');
 });
 
-test('Cache#remove removes items by key', (assert) => {
-  let cache = new Cache();
+test('QueryCache#remove removes items by key', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'myotherkey', 'mynewvalue');
 
-  assert.equal(Object.keys(cache._internalCache['my-type']).length, 2);
+  assert.equal(Object.keys(queryCache._internalCache['my-type']).length, 2);
 
-  cache.remove('my-type', 'mykey');
+  queryCache.remove('my-type', 'mykey');
 
-  assert.equal(Object.keys(cache._internalCache['my-type']).length, 1);
+  assert.equal(Object.keys(queryCache._internalCache['my-type']).length, 1);
 });
 
-test('Cache#remove doesn\'t remove items when type not present', (assert) => {
-  let cache = new Cache();
+test('QueryCache#remove doesn\'t remove items when type not present', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'myotherkey', 'mynewvalue');
 
-  assert.equal(cache.types.length, 1);
+  assert.equal(queryCache.types.length, 1);
 
-  cache.remove('other-type', 'mykey');
+  queryCache.remove('other-type', 'mykey');
 
-  assert.equal(cache.types.length, 1);
+  assert.equal(queryCache.types.length, 1);
 });
 
-test('Cache#remove doesn\'t remove items when key not present', (assert) => {
-  let cache = new Cache();
+test('QueryCache#remove doesn\'t remove items when key not present', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'myotherkey', 'mynewvalue');
 
-  assert.equal(Object.keys(cache._internalCache['my-type']).length, 2);
+  assert.equal(Object.keys(queryCache._internalCache['my-type']).length, 2);
 
-  cache.remove('my-type', 'randomkey');
+  queryCache.remove('my-type', 'randomkey');
 
-  assert.equal(Object.keys(cache._internalCache['my-type']).length, 2);
+  assert.equal(Object.keys(queryCache._internalCache['my-type']).length, 2);
 });
 
-test('Cache#clear removes all items from cache', (assert) => {
-  let cache = new Cache();
+test('QueryCache#clear removes all items from queryCache', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'myotherkey', 'mynewvalue');
-  cache.add('other-type', 'myotherkey', 'mynewvalue');
-  cache.add('random-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('other-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('random-type', 'myotherkey', 'mynewvalue');
 
-  assert.equal(cache.types.length, 3);
+  assert.equal(queryCache.types.length, 3);
 
-  cache.clear();
+  queryCache.clear();
 
-  assert.equal(cache.types.length, 0);
+  assert.equal(queryCache.types.length, 0);
 });
 
-test('Cache#get retrieves item by type when type present', (assert) => {
-  let cache = new Cache();
+test('QueryCache#get retrieves item by type when type present', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'myotherkey', 'mynewvalue');
 
-  assert.equal(cache.get('my-type', 'myotherkey'), 'mynewvalue');
+  assert.equal(queryCache.get('my-type', 'myotherkey'), 'mynewvalue');
 });
 
-test('Cache#get does to retrieve item when type not present', (assert) => {
-  let cache = new Cache();
+test('QueryCache#get does to retrieve item when type not present', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'myotherkey', 'mynewvalue');
 
-  assert.notOk(cache.get('random-type', 'randomkey'));
+  assert.notOk(queryCache.get('random-type', 'randomkey'));
 });
 
-test('Cache#get does to retrieve item when key not present', (assert) => {
-  let cache = new Cache();
+test('QueryCache#get does to retrieve item when key not present', (assert) => {
+  let queryCache = new QueryCache();
 
-  cache.add('my-type', 'mykey', 'myvalue');
-  cache.add('my-type', 'myotherkey', 'mynewvalue');
+  queryCache.add('my-type', 'mykey', 'myvalue');
+  queryCache.add('my-type', 'myotherkey', 'mynewvalue');
 
-  assert.notOk(cache.get('my-type', 'randomkey'));
+  assert.notOk(queryCache.get('my-type', 'randomkey'));
+});
+
+test('QueryCache#scheduleDecay schedules the decay task', function(assert) {
+  let done = assert.async();
+  let queryCache = new QueryCache();
+
+  queryCache.add('type', 'key', 'value');
+
+  queryCache.scheduleDecay(50, () => {
+    assert.equal(queryCache.types.length, 0);
+    done();
+  });
+});
+
+test('cancelDecay correctly cancels the cache decay', function(assert) {
+  let done = assert.async();
+  let queryCache = new QueryCache();
+
+  queryCache.add('type', 'key', 'value');
+
+  queryCache.scheduleDecay(1000);
+  queryCache.cancelDecay();
+
+  setTimeout(() => {
+    assert.equal(queryCache.types.length, 1);
+    assert.equal(queryCache.get('type', 'key'), 'value');
+
+    done();
+  }, 3000);
 });

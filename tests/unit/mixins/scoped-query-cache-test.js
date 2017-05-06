@@ -139,30 +139,3 @@ test('if shouldCachePredicate is false, do not insert into cache', function(asse
 
 // test('findRecord is supported');
 // test('failed promise is handled properly')
-
-test('scheduleCacheDecay schedules the decay task', function(assert) {
-  let done = assert.async();
-
-  this.subject._scopedQueryCache.cache.add('type', 'key', 'value');
-
-  this.subject.scheduleCacheDecay(50, () => {
-    assert.equal(this.subject._scopedQueryCache.cache.types.length, 0);
-    done();
-  });
-});
-
-test('cancelDecay correctly cancels the cache decay', function(assert) {
-  let done = assert.async();
-
-  this.subject._scopedQueryCache.cache.add('type', 'key', 'value');
-
-  this.subject.scheduleCacheDecay(1000);
-  this.subject.cancelCacheDecay();
-
-  setTimeout(() => {
-    assert.equal(this.subject._scopedQueryCache.cache.types.length, 1);
-    assert.equal(this.subject._scopedQueryCache.cache.get('type', 'key'), 'value');
-
-    done();
-  }, 3000);
-});

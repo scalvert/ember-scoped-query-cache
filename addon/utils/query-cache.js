@@ -1,7 +1,10 @@
 
-export default class Cache {
+const CACHE_DECAY_TIMEOUT = 5000;
+
+export default class QueryCache {
   constructor() {
     this._internalCache = Object.create(null);
+    this.decayId = null;
   }
 
   add(type, key, value) {
@@ -38,5 +41,29 @@ export default class Cache {
 
   get types() {
     return Object.keys(this._internalCache);
+  }
+
+  scheduleDecay(delay = CACHE_DECAY_TIMEOUT, onDecay) {
+    if (this.decayId) {
+      this.cancelDecay();
+    }
+
+    this.decayId = setTimeout(() => {
+      this._internalCache = Object.create(null);
+      this.decayId = null;
+
+      onDecay && typeof onDecay === 'function' && onDecay();
+    }, delay);
+  }
+
+  cancelDecay() {
+    clearTimeout(this.decayId);
+    this.decayId = null;
+  }
+
+  destroy() {
+    clearTimeout(this.decayId);
+    this._internalCache = null;
+    this.decayId = null;
   }
 }

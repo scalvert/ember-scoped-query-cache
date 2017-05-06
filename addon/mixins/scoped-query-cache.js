@@ -1,14 +1,11 @@
 import Ember from 'ember';
-import { Cache, sortedObject } from 'ember-scoped-query-cache/utils';
+import { QueryCache, sortedObject } from 'ember-scoped-query-cache/utils';
 const {
   assert,
-  run,
   inject,
   typeOf,
   Mixin
 } = Ember;
-
-const CACHE_DECAY_TIMEOUT = 5000;
 
 export default Mixin.create({
   store: inject.service(),
@@ -16,23 +13,23 @@ export default Mixin.create({
   init() {
     this._super(...arguments);
 
-    this._scopedQueryCache = this._createScopedQueryCache();
+    this.queryCache = new QueryCache();
   },
 
   destroy() {
-    this.cancelCacheDecay();
+    this.queryCache.destroy();
 
     this._super(...arguments);
   },
 
   queryRecord(modelName, query, options = {}) {
     const queryRecordMethod = () => this.get('store').queryRecord(modelName, query);
-    return this.queryCache(modelName, query, options, queryRecordMethod);
+    return this.getFromCache(modelName, query, options, queryRecordMethod);
   },
 
   query(modelName, query, options = {}) {
     const queryMethod = () => this.get('store').query(modelName, query);
-    return this.queryCache(modelName, query, options, queryMethod);
+    return this.getFromCache(modelName, query, options, queryMethod);
   },
 
   findRecord() {
@@ -49,7 +46,7 @@ export default Mixin.create({
     return JSON.stringify(sortedObject(queryCache));
   },
 
-  queryCache(modelName, query, options = {}, queryMethod) {
+  getFromCache(modelName, query, options = {}, queryMethod) {
     const { formatCacheKey, shouldCachePredicate } = options;
 
     /**
@@ -57,7 +54,7 @@ export default Mixin.create({
      * Check if we have a cache hit, and if not, insert into cache
      */
     const cacheReadStringifiedQuery = this.getStringifiedQuery(query, formatCacheKey);
-    const cacheHit = this._scopedQueryCache.cache.get(modelName, cacheReadStringifiedQuery);
+    const cacheHit = this.queryCache.get(modelName, cacheReadStringifiedQuery);
 
     if (cacheHit) {
       return cacheHit;
@@ -73,38 +70,10 @@ export default Mixin.create({
       assert('shouldCache needs to be a boolean value', typeof(shouldCache) === 'boolean');
 
       if (shouldCache) {
-        this._scopedQueryCache.cache.add(modelName, cacheReadStringifiedQuery, queryPromise);
+        this.queryCache.add(modelName, cacheReadStringifiedQuery, queryPromise);
       }
 
       return results;
     });
-  },
-
-  scheduleCacheDecay(delay = CACHE_DECAY_TIMEOUT, callback) {
-    if (this._scopedQueryCache.decayId) {
-      this.cancelCacheDecay();
-    }
-
-    this._scopedQueryCache.decayId = run.later(() => {
-      if (this.isDestroying || this.isDestroyed) {
-        return;
-      }
-
-      this._scopedQueryCache = this._createScopedQueryCache();
-
-      callback && typeof callback === 'function' && callback();
-    }, delay);
-  },
-
-  cancelCacheDecay() {
-    run.cancel(this._scopedQueryCache.decayId);
-    this._scopedQueryCache.decayId = null;
-  },
-
-  _createScopedQueryCache() {
-    return {
-      cache: new Cache(),
-      decayId: null
-    };
   }
 });
