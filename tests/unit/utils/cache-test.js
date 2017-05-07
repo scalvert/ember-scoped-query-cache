@@ -3,13 +3,13 @@ import { QueryCache } from 'ember-scoped-query-cache/utils';
 
 module('Unit | Utility | query-queryCache');
 
-test('Creates queryCache object with internal map', (assert) => {
+test('Creates queryCache object with internal map', function (assert) {
   let queryCache = new QueryCache();
 
   assert.ok(queryCache._internalCache);
 });
 
-test('QueryCache#add skips adding if key is undefined', (assert) => {
+test('QueryCache#add skips adding if key is undefined', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type');
@@ -17,7 +17,7 @@ test('QueryCache#add skips adding if key is undefined', (assert) => {
   assert.notOk(queryCache._internalCache['my-type']);
 });
 
-test('QueryCache#add skips adding if value is undefined', (assert) => {
+test('QueryCache#add skips adding if value is undefined', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey');
@@ -25,7 +25,7 @@ test('QueryCache#add skips adding if value is undefined', (assert) => {
   assert.notOk(queryCache._internalCache['my-type']);
 });
 
-test('QueryCache#add adds item to queryCache when all params specified', (assert) => {
+test('QueryCache#add adds item to queryCache when all params specified', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -34,7 +34,7 @@ test('QueryCache#add adds item to queryCache when all params specified', (assert
   assert.ok(queryCache._internalCache['my-type']['mykey']);
 });
 
-test('QueryCache#add updates existing value when key present', (assert) => {
+test('QueryCache#add updates existing value when key present', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -43,7 +43,7 @@ test('QueryCache#add updates existing value when key present', (assert) => {
   assert.equal(queryCache._internalCache['my-type']['mykey'], 'mynewvalue');
 });
 
-test('QueryCache#remove removes items by key', (assert) => {
+test('QueryCache#remove removes items by key', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -56,7 +56,7 @@ test('QueryCache#remove removes items by key', (assert) => {
   assert.equal(Object.keys(queryCache._internalCache['my-type']).length, 1);
 });
 
-test('QueryCache#remove doesn\'t remove items when type not present', (assert) => {
+test('QueryCache#remove doesn\'t remove items when type not present', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -69,7 +69,7 @@ test('QueryCache#remove doesn\'t remove items when type not present', (assert) =
   assert.equal(queryCache.types.length, 1);
 });
 
-test('QueryCache#remove doesn\'t remove items when key not present', (assert) => {
+test('QueryCache#remove doesn\'t remove items when key not present', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -82,7 +82,7 @@ test('QueryCache#remove doesn\'t remove items when key not present', (assert) =>
   assert.equal(Object.keys(queryCache._internalCache['my-type']).length, 2);
 });
 
-test('QueryCache#clear removes all items from queryCache', (assert) => {
+test('QueryCache#clear removes all items from queryCache', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -97,7 +97,7 @@ test('QueryCache#clear removes all items from queryCache', (assert) => {
   assert.equal(queryCache.types.length, 0);
 });
 
-test('QueryCache#get retrieves item by type when type present', (assert) => {
+test('QueryCache#get retrieves item by type when type present', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -106,7 +106,7 @@ test('QueryCache#get retrieves item by type when type present', (assert) => {
   assert.equal(queryCache.get('my-type', 'myotherkey'), 'mynewvalue');
 });
 
-test('QueryCache#get does to retrieve item when type not present', (assert) => {
+test('QueryCache#get does to retrieve item when type not present', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
@@ -115,7 +115,7 @@ test('QueryCache#get does to retrieve item when type not present', (assert) => {
   assert.notOk(queryCache.get('random-type', 'randomkey'));
 });
 
-test('QueryCache#get does to retrieve item when key not present', (assert) => {
+test('QueryCache#get does to retrieve item when key not present', function(assert) {
   let queryCache = new QueryCache();
 
   queryCache.add('my-type', 'mykey', 'myvalue');
