@@ -8,23 +8,19 @@ export default class QueryCache {
   }
 
   add(type, key, value) {
-    if (!key || !value) {
-      return;
-    }
+   if (!key) {
+     throw new Error('You must provide a key to the `add` method when caching a value.');
+   }
 
-    if (!this._internalCache[type]) {
-      this._internalCache[type] = Object.create(null);
-    }
+    key = `${type}!${key}`;
 
-    this._internalCache[type][key] = value;
+    this._internalCache[key] = value;
   }
 
   remove(type, key) {
-    let typeMap = this._internalCache[type];
+    key = `${type}!${key}`;
 
-    if (typeMap && typeMap[key]) {
-      delete typeMap[key];
-    }
+    delete this._internalCache[key];
   }
 
   clear() {
@@ -32,15 +28,9 @@ export default class QueryCache {
   }
 
   get(type, key) {
-    if (!this._internalCache[type]) {
-      return;
-    }
+    key = `${type}!${key}`;
 
-    return this._internalCache[type][key];
-  }
-
-  get types() {
-    return Object.keys(this._internalCache);
+    return this._internalCache[key];
   }
 
   scheduleDecay(delay = CACHE_DECAY_TIMEOUT, onDecay) {

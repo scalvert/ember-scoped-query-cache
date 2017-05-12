@@ -14,8 +14,8 @@ module('Unit | Mixin | scoped query cache', {
      * The alternative is to wrap queryRecord in `.then` chains within each test
      */
     const promiseMock = {
-      then: (foo) => (RSVP.Promise.resolve(foo())),
-      catch: (bar) => (RSVP.Promise.resolve(bar()))
+      then: foo => RSVP.Promise.resolve(foo()),
+      catch: bar => RSVP.Promise.resolve(bar())
     };
 
     this.queryRecordStub = this.sandbox.stub().returns(promiseMock);
@@ -25,8 +25,8 @@ module('Unit | Mixin | scoped query cache', {
       query: this.queryStub
     };
 
-    const scopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
-    this.subject = scopedQueryCacheObject.create({
+    const ScopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
+    this.subject = ScopedQueryCacheObject.create({
       store: this.storeStub
     });
   },
@@ -38,38 +38,38 @@ module('Unit | Mixin | scoped query cache', {
 
 test('queryRecord calls store queryRecord', function(assert) {
   const queryParams = { foo: 'abc' };
-  this.subject.queryRecord('foobar', queryParams);
+
+  this.subject.scopedStore.queryRecord('foobar', queryParams);
 
   assert.equal(this.queryRecordStub.getCalls().length, 1);
 });
 
 test('query calls store query', function(assert) {
-  const subject = this.subject;
   const queryParams = { foo: 'abc' };
-  subject.query('foobar', queryParams);
+
+  this.subject.scopedStore.query('foobar', queryParams);
 
   assert.equal(this.queryStub.getCalls().length, 1);
 });
 
 test('cache miss calls queryRecord twice', function(assert) {
-  const subject = this.subject;
   const queryParams = { foo: 'abc' };
   const cacheMissQueryParams = { foo: 'abcd' };
 
-  subject.queryRecord('foobar', queryParams);
-  subject.queryRecord('foobar', cacheMissQueryParams);
+  this.subject.scopedStore.queryRecord('foobar', queryParams);
+  this.subject.scopedStore.queryRecord('foobar', cacheMissQueryParams);
 
   assert.equal(this.queryRecordStub.getCalls().length, 2);
 });
 
 test('cache hit calls queryRecord once', function(assert) {
   assert.expect(1);
-  const subject = this.subject;
+
   const query = { a: '1' };
 
-  subject.queryRecord('foo', query);
-  subject.queryRecord('foo', query);
-  subject.queryRecord('foo', query);
+  this.subject.scopedStore.queryRecord('foo', query);
+  this.subject.scopedStore.queryRecord('foo', query);
+  this.subject.scopedStore.queryRecord('foo', query);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
@@ -80,11 +80,12 @@ test('cache hit calls queryRecord once', function(assert) {
 
 test('query object order does not matter', function(assert) {
   assert.expect(1);
-  const subject = this.subject;
+
   const firstQuery = { firstArg: 'foooooooo', secondArg: 'barrrrrrrr' };
   const secondQuery = { secondArg: 'barrrrrrrr', firstArg: 'foooooooo' };
-  subject.queryRecord('foo', firstQuery);
-  subject.queryRecord('foo', secondQuery);
+
+  this.subject.scopedStore.queryRecord('foo', firstQuery);
+  this.subject.scopedStore.queryRecord('foo', secondQuery);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
@@ -96,7 +97,6 @@ test('query object order does not matter', function(assert) {
 test('formatCacheKey is called on query', function(assert) {
   assert.expect(1);
 
-  const subject = this.subject;
   const firstQuery = { firstArg: 'fooo', secondArg: 'barr' };
   const secondQuery = { firstArg: 'fooo', secondArg: 'barr' };
   const formatCacheKey = (queryParams) => (
@@ -109,8 +109,8 @@ test('formatCacheKey is called on query', function(assert) {
       }, {})
   );
 
-  subject.queryRecord('foo', firstQuery, { formatCacheKey });
-  subject.queryRecord('foo', secondQuery);
+  this.subject.scopedStore.queryRecord('foo', firstQuery, { formatCacheKey });
+  this.subject.scopedStore.queryRecord('foo', secondQuery);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
@@ -122,13 +122,12 @@ test('formatCacheKey is called on query', function(assert) {
 test('if shouldCachePredicate is false, do not insert into cache', function(assert) {
   assert.expect(1);
 
-  const subject = this.subject;
   const shouldCachePredicate = () => false;
   const firstQuery = { firstArg: 'foo', secondArg: 'bar' };
   const secondQuery = { firstArg: 'foo', secondArg: 'bar' };
 
-  subject.queryRecord('foo', firstQuery, { shouldCachePredicate });
-  subject.queryRecord('foo', secondQuery);
+  this.subject.scopedStore.queryRecord('foo', firstQuery, { shouldCachePredicate });
+  this.subject.scopedStore.queryRecord('foo', secondQuery);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
