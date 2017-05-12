@@ -3,24 +3,19 @@ const CACHE_DECAY_TIMEOUT = 5000;
 
 export default class QueryCache {
   constructor() {
-    this._internalCache = Object.create(null);
-    this.decayId = null;
+    this._init();
   }
 
   add(type, key, value) {
-   if (!key) {
-     throw new Error('You must provide a key to the `add` method when caching a value.');
-   }
+    if (!key) {
+      throw new Error('You must provide a key to the `add` method when caching a value.');
+    }
 
-    key = `${type}!${key}`;
-
-    this._internalCache[key] = value;
+    this._internalCache[this._getKey(type, key)] = value;
   }
 
   remove(type, key) {
-    key = `${type}!${key}`;
-
-    delete this._internalCache[key];
+    delete this._internalCache[this._getKey(type, key)];
   }
 
   clear() {
@@ -28,9 +23,7 @@ export default class QueryCache {
   }
 
   get(type, key) {
-    key = `${type}!${key}`;
-
-    return this._internalCache[key];
+    return this._internalCache[this._getKey(type, key)];
   }
 
   scheduleDecay(delay = CACHE_DECAY_TIMEOUT, onDecay) {
@@ -39,8 +32,7 @@ export default class QueryCache {
     }
 
     this.decayId = setTimeout(() => {
-      this._internalCache = Object.create(null);
-      this.decayId = null;
+      this._init();
 
       onDecay && typeof onDecay === 'function' && onDecay();
     }, delay);
@@ -51,9 +43,17 @@ export default class QueryCache {
     this.decayId = null;
   }
 
-  destroy() {
+  reset() {
     clearTimeout(this.decayId);
-    this._internalCache = null;
+    this._init();
+  }
+
+  _init() {
+    this._internalCache = Object.create(null);
     this.decayId = null;
+  }
+
+  _getKey(type, key) {
+    return `${type}!${key}`;
   }
 }

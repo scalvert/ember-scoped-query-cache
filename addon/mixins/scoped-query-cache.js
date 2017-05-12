@@ -16,7 +16,7 @@ export default Mixin.create({
   },
 
   destroy() {
-    this.queryCache.destroy();
+    this.scopedStore.destroy();
 
     this._super(...arguments);
   },

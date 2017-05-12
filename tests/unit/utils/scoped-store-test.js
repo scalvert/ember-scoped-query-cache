@@ -1,11 +1,11 @@
 import Ember from 'ember';
 import sinon from 'sinon';
-import ScopedQueryCacheMixin from 'ember-scoped-query-cache/mixins/scoped-query-cache';
+import { ScopedStore } from 'ember-scoped-query-cache/utils';
 import { module, test } from 'qunit';
 
 const { RSVP } = Ember;
 
-module('Unit | Mixin | scoped query cache', {
+module('Unit | Mixin | scoped store', {
   beforeEach() {
     this.sandbox = sinon.sandbox.create();
     /**
@@ -25,10 +25,7 @@ module('Unit | Mixin | scoped query cache', {
       query: this.queryStub
     };
 
-    const ScopedQueryCacheObject = Ember.Object.extend(ScopedQueryCacheMixin);
-    this.subject = ScopedQueryCacheObject.create({
-      store: this.storeStub
-    });
+    this.scopedStore = new ScopedStore(this.storeStub);
   },
 
   afterEach() {
@@ -39,7 +36,7 @@ module('Unit | Mixin | scoped query cache', {
 test('queryRecord calls store queryRecord', function(assert) {
   const queryParams = { foo: 'abc' };
 
-  this.subject.scopedStore.queryRecord('foobar', queryParams);
+  this.scopedStore.queryRecord('foobar', queryParams);
 
   assert.equal(this.queryRecordStub.getCalls().length, 1);
 });
@@ -47,7 +44,7 @@ test('queryRecord calls store queryRecord', function(assert) {
 test('query calls store query', function(assert) {
   const queryParams = { foo: 'abc' };
 
-  this.subject.scopedStore.query('foobar', queryParams);
+  this.scopedStore.query('foobar', queryParams);
 
   assert.equal(this.queryStub.getCalls().length, 1);
 });
@@ -56,8 +53,8 @@ test('cache miss calls queryRecord twice', function(assert) {
   const queryParams = { foo: 'abc' };
   const cacheMissQueryParams = { foo: 'abcd' };
 
-  this.subject.scopedStore.queryRecord('foobar', queryParams);
-  this.subject.scopedStore.queryRecord('foobar', cacheMissQueryParams);
+  this.scopedStore.queryRecord('foobar', queryParams);
+  this.scopedStore.queryRecord('foobar', cacheMissQueryParams);
 
   assert.equal(this.queryRecordStub.getCalls().length, 2);
 });
@@ -67,9 +64,9 @@ test('cache hit calls queryRecord once', function(assert) {
 
   const query = { a: '1' };
 
-  this.subject.scopedStore.queryRecord('foo', query);
-  this.subject.scopedStore.queryRecord('foo', query);
-  this.subject.scopedStore.queryRecord('foo', query);
+  this.scopedStore.queryRecord('foo', query);
+  this.scopedStore.queryRecord('foo', query);
+  this.scopedStore.queryRecord('foo', query);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
@@ -84,8 +81,8 @@ test('query object order does not matter', function(assert) {
   const firstQuery = { firstArg: 'foooooooo', secondArg: 'barrrrrrrr' };
   const secondQuery = { secondArg: 'barrrrrrrr', firstArg: 'foooooooo' };
 
-  this.subject.scopedStore.queryRecord('foo', firstQuery);
-  this.subject.scopedStore.queryRecord('foo', secondQuery);
+  this.scopedStore.queryRecord('foo', firstQuery);
+  this.scopedStore.queryRecord('foo', secondQuery);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
@@ -109,8 +106,8 @@ test('formatCacheKey is called on query', function(assert) {
       }, {})
   );
 
-  this.subject.scopedStore.queryRecord('foo', firstQuery, { formatCacheKey });
-  this.subject.scopedStore.queryRecord('foo', secondQuery);
+  this.scopedStore.queryRecord('foo', firstQuery, { formatCacheKey });
+  this.scopedStore.queryRecord('foo', secondQuery);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
@@ -126,8 +123,8 @@ test('if shouldCachePredicate is false, do not insert into cache', function(asse
   const firstQuery = { firstArg: 'foo', secondArg: 'bar' };
   const secondQuery = { firstArg: 'foo', secondArg: 'bar' };
 
-  this.subject.scopedStore.queryRecord('foo', firstQuery, { shouldCachePredicate });
-  this.subject.scopedStore.queryRecord('foo', secondQuery);
+  this.scopedStore.queryRecord('foo', firstQuery, { shouldCachePredicate });
+  this.scopedStore.queryRecord('foo', secondQuery);
 
   assert.equal(
     this.queryRecordStub.getCalls().length,
@@ -135,6 +132,3 @@ test('if shouldCachePredicate is false, do not insert into cache', function(asse
     'shouldCachePredicate should make sure nothing is in cache'
   );
 });
-
-// test('findRecord is supported');
-// test('failed promise is handled properly')

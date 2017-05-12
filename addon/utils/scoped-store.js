@@ -64,4 +64,16 @@ export default class ScopedStore {
       return results;
     });
   }
+
+  scheduleDecay(delay, onDecay) {
+    this._queryCache.scheduleDecay(delay, onDecay);
+  }
+
+  cancelDecay() {
+    this._queryCache.cancelDecay();
+  }
+
+  destroy() {
+    this._queryCache.destroy();
+  }
 }
