@@ -18,10 +18,6 @@ export default class QueryCache {
     delete this._internalCache[this._getKey(type, key)];
   }
 
-  clear() {
-    this._internalCache = Object.create(null);
-  }
-
   get(type, key) {
     return this._internalCache[this._getKey(type, key)];
   }

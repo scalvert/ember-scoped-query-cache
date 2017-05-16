@@ -52,7 +52,7 @@ test('QueryCache#remove doesn\'t remove items when key not present', function(as
   assert.equal(Object.keys(this.queryCache._internalCache).length, 2);
 });
 
-test('QueryCache#clear removes all items from queryCache', function(assert) {
+test('QueryCache#reset removes all items from queryCache', function(assert) {
   this.queryCache.add('my-type', 'mykey', 'myvalue');
   this.queryCache.add('my-type', 'myotherkey', 'mynewvalue');
   this.queryCache.add('other-type', 'myotherkey', 'mynewvalue');
@@ -60,9 +60,10 @@ test('QueryCache#clear removes all items from queryCache', function(assert) {
 
   assert.equal(Object.keys(this.queryCache._internalCache).length, 4);
 
-  this.queryCache.clear();
+  this.queryCache.reset();
 
   assert.equal(Object.keys(this.queryCache._internalCache).length, 0);
+  assert.equal(this.queryCache.decayId, null);
 });
 
 test('QueryCache#get retrieves item by key when key present', function(assert) {
